@@ -1,0 +1,30 @@
+//GET /temperatura
+{
+    "Atual": {
+        "Temperatura": 20.0,
+        "Setup": 18.0
+    },
+    "Rampas": [
+        {
+            "temperatura": 10.0,
+            "data": "2020-04-30"
+        },
+        {
+            "temperatura": 0.0,
+            "data": "2020-05-05"
+        },
+        {
+            "temperatura": -0.5,
+            "data": "2020-05-10"
+        }
+    ]
+}
+//POST /temperatura
+{
+    "Setup": 18.0
+}
+//POST /Rampa
+        {
+            "temperatura": 10.0,
+            "data": "2020-04-30"
+        }
