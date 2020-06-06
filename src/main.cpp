@@ -15,12 +15,15 @@ ESP8266WebServer server(80);
 const char *wifiName = "LINO-WIFI";
 const char *wifiPass = "22051974";
 
-const int oneWireBus = 5;            // D1 GPIO onde o sensor está conectado
+const int oneWireBus = 16;            // D0 GPIO onde o sensor está conectado
 OneWire oneWire(oneWireBus);         // Objeto oneWire para comunicação com o sensor
 DallasTemperature sensors(&oneWire); // Passando a referencia do sensor Dallas para o objeto onewire
 //Conexões rele
-const int LED = 4;  //D2  GPIO4
-const int rele = 0; //D3  GPIO0
+const int LEDAzul = 5;  //D1  GPIO4
+const int LEDVerde = 4;  //D2  GPIO4
+const int LEDVermelho = 0;  //D3  GPIO4
+const int releResfriamento = 2; //D4  GPIO0
+const int releAquecimento = 14; //D5  GPIO0
 
 float temperaturaEsperada = 18;
 
@@ -151,8 +154,11 @@ void setup(void)
   sensors.begin();
   Serial.println("Inicializando o rele: ");
   Serial.print("Rele: ");
-  pinMode(rele, OUTPUT);
-  pinMode(LED, OUTPUT);
+  pinMode(releResfriamento, OUTPUT);
+  pinMode(releAquecimento, OUTPUT);
+  pinMode(LEDAzul, OUTPUT);
+  pinMode(LEDVerde, OUTPUT);
+  pinMode(LEDVermelho, OUTPUT);
   Serial.println("Ok");
 
   // Chama a função 'handleRoot' quando buscar o endereço 'http://enderecoControlador'
@@ -180,21 +186,27 @@ void loop(void)
   server.handleClient();
   sensors.requestTemperatures();
   float temperaturaAtual = (int)sensors.getTempCByIndex(0);
-
+Serial.println(temperaturaAtual);
   if (temperaturaAtual >= temperaturaEsperada + 1)
   {
-    // Serial.print("Liga: ");
-    // Serial.println(temperaturaAtual);
-    digitalWrite(rele, LOW);
-    digitalWrite(LED, HIGH);
+    digitalWrite(releResfriamento, LOW);
+    digitalWrite(releAquecimento, HIGH);
+    digitalWrite(LEDAzul, LOW);
+    digitalWrite(LEDVerde, LOW);
+    digitalWrite(LEDVermelho, HIGH);
     return;
   }
   if (temperaturaAtual <= temperaturaEsperada - 1)
   {
-    // Serial.print("Liga: ");
-    // Serial.println(temperaturaAtual);
-    digitalWrite(rele, HIGH);
-    digitalWrite(LED, LOW);
+    
+    digitalWrite(releResfriamento, HIGH);
+    digitalWrite(releAquecimento, LOW);
+    digitalWrite(LEDAzul, HIGH);
+    digitalWrite(LEDVerde, LOW);
+    digitalWrite(LEDVermelho, LOW);
     return;
   }
+  digitalWrite(LEDAzul, LOW);
+  digitalWrite(LEDVerde, HIGH);
+  digitalWrite(LEDVermelho, LOW);
 }
