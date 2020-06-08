@@ -15,13 +15,13 @@ ESP8266WebServer server(80);
 const char *wifiName = "LINO-WIFI";
 const char *wifiPass = "22051974";
 
-const int oneWireBus = 12;            // D6 GPIO12 onde o sensor está conectado
+const int oneWireBus = 12;           // D6 GPIO12 onde o sensor está conectado
 OneWire oneWire(oneWireBus);         // Objeto oneWire para comunicação com o sensor
 DallasTemperature sensors(&oneWire); // Passando a referencia do sensor Dallas para o objeto onewire
 //Conexões rele
-const int LEDAzul = 5;  //D1  GPIO5
-const int LEDVerde = 4;  //D2  GPIO4
-const int LEDVermelho = 0;  //D3  GPIO0
+const int LEDAzul = 5;          //D1  GPIO5
+const int LEDVerde = 4;         //D2  GPIO4
+const int LEDVermelho = 0;      //D3  GPIO0
 const int releResfriamento = 2; //D4  GPIO2
 const int releAquecimento = 14; //D5  GPIO14
 
@@ -112,7 +112,7 @@ void setup(void)
   {
     delay(250);
     Serial.print('.');
-  }  
+  }
   ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH)
@@ -131,11 +131,16 @@ void setup(void)
   });
   ArduinoOTA.onError([](ota_error_t error) {
     Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    if (error == OTA_AUTH_ERROR)
+      Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR)
+      Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR)
+      Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR)
+      Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR)
+      Serial.println("End Failed");
   });
   ArduinoOTA.begin();
   Serial.println("Ready OTA ESP8266");
@@ -146,7 +151,7 @@ void setup(void)
   Serial.print("Endereço IP: ");
   Serial.print(WiFi.localIP());
   Serial.println('\n');
-  
+
   Serial.println('\n');
   Serial.print("Inicializando o Sensor na porta: ");
   Serial.print(oneWireBus);
@@ -186,7 +191,7 @@ void loop(void)
   server.handleClient();
   sensors.requestTemperatures();
   float temperaturaAtual = (int)sensors.getTempCByIndex(0);
-Serial.println(temperaturaAtual);
+  Serial.println(temperaturaAtual);
   if (temperaturaAtual >= temperaturaEsperada + 1)
   {
     digitalWrite(releResfriamento, LOW);
@@ -198,7 +203,7 @@ Serial.println(temperaturaAtual);
   }
   if (temperaturaAtual <= temperaturaEsperada - 1)
   {
-    
+
     digitalWrite(releResfriamento, HIGH);
     digitalWrite(releAquecimento, LOW);
     digitalWrite(LEDAzul, HIGH);
