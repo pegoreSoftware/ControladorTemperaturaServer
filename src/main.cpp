@@ -15,15 +15,15 @@ ESP8266WebServer server(80);
 const char *wifiName = "LINO-WIFI";
 const char *wifiPass = "22051974";
 
-const int oneWireBus = 16;            // D0 GPIO onde o sensor está conectado
+const int oneWireBus = 12;            // D6 GPIO12 onde o sensor está conectado
 OneWire oneWire(oneWireBus);         // Objeto oneWire para comunicação com o sensor
 DallasTemperature sensors(&oneWire); // Passando a referencia do sensor Dallas para o objeto onewire
 //Conexões rele
-const int LEDAzul = 5;  //D1  GPIO4
+const int LEDAzul = 5;  //D1  GPIO5
 const int LEDVerde = 4;  //D2  GPIO4
-const int LEDVermelho = 0;  //D3  GPIO4
-const int releResfriamento = 2; //D4  GPIO0
-const int releAquecimento = 14; //D5  GPIO0
+const int LEDVermelho = 0;  //D3  GPIO0
+const int releResfriamento = 2; //D4  GPIO2
+const int releAquecimento = 14; //D5  GPIO14
 
 float temperaturaEsperada = 18;
 
