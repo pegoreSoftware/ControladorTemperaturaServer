@@ -35,12 +35,17 @@ void getTemperatura()
   Serial.print(temperaturaAtual);
   Serial.println(" ºC");
 
-  const size_t capacity = JSON_ARRAY_SIZE(3) + 5 * JSON_OBJECT_SIZE(2);
+  const size_t capacity = JSON_ARRAY_SIZE(3) + 4 * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(7);
   DynamicJsonDocument doc(capacity);
 
   JsonObject Atual = doc.createNestedObject("Atual");
   Atual["Temperatura"] = temperaturaAtual;
   Atual["Setup"] = temperaturaEsperada;
+  Atual["ReleResfriamento"] = digitalRead(releResfriamento) == 0 ? true : false;
+  Atual["ReleAquecimento"] = digitalRead(releAquecimento) == 0 ? true : false;
+  Atual["LEDVermelho"] = digitalRead(LEDVermelho) == 0 ? true : false;
+  Atual["LEDVerde"] = digitalRead(LEDVerde) == 0 ? true : false;
+  Atual["LEDAzul"] = digitalRead(LEDAzul) == 0 ? true : false;
 
   JsonArray Rampas = doc.createNestedArray("Rampas");
 
@@ -201,17 +206,21 @@ void loop(void)
     digitalWrite(LEDVermelho, HIGH);
     return;
   }
-  if (temperaturaAtual <= temperaturaEsperada - 1)
-  {
+  // if (temperaturaAtual <= temperaturaEsperada - 1)
+  // {
 
-    digitalWrite(releResfriamento, HIGH);
-    digitalWrite(releAquecimento, LOW);
-    digitalWrite(LEDAzul, HIGH);
-    digitalWrite(LEDVerde, LOW);
-    digitalWrite(LEDVermelho, LOW);
-    return;
-  }
-  digitalWrite(LEDAzul, LOW);
-  digitalWrite(LEDVerde, HIGH);
-  digitalWrite(LEDVermelho, LOW);
+  //   digitalWrite(releResfriamento, HIGH);
+  //   digitalWrite(releAquecimento, LOW);
+  //   digitalWrite(LEDAzul, HIGH);
+  //   digitalWrite(LEDVerde, LOW);
+  //   digitalWrite(LEDVermelho, LOW);
+  //   return;
+  // }
+  // digitalWrite(LEDAzul, LOW);
+  // digitalWrite(LEDVerde, HIGH);
+  // digitalWrite(LEDVermelho, LOW);
+  /*
+  Lógica para inversão automatrica
+  digitalWrite(LEDAzul, !digitalRead(LEDAzul));
+*/
 }

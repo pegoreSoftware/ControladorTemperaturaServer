@@ -1,0 +1,5 @@
+//POST /Rampa
+{
+    "temperatura": 10.0,
+    "data": "2020-04-30"
+}

@@ -1,16 +1,21 @@
 //GET /temperatura
 {
     "Atual": {
-        "Temperatura": 20.0,
-        "Setup": 18.0
+        "Temperatura": 18.1875,
+        "Setup": 20,
+        "ReleResfriamento":1,
+        "ReleAquecimento":1,
+        "LedVermelho":1,
+        "LedVerde":1,
+        "LedAzul":1
     },
     "Rampas": [
         {
-            "temperatura": 10.0,
+            "temperatura": 10,
             "data": "2020-04-30"
         },
         {
-            "temperatura": 0.0,
+            "temperatura": 0,
             "data": "2020-05-05"
         },
         {
@@ -19,12 +24,3 @@
         }
     ]
 }
-//POST /temperatura
-{
-    "Setup": 18.0
-}
-//POST /Rampa
-        {
-            "temperatura": 10.0,
-            "data": "2020-04-30"
-        }

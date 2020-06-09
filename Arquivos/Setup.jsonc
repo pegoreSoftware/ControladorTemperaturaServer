@@ -1,0 +1,4 @@
+//POST /temperatura
+{
+    "Setup": 18.0
+}
