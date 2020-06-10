@@ -5,6 +5,8 @@
 #include <OneWire.h>           // Sensor um fio
 #include <DallasTemperature.h> //Sensor Dallas usado o DS18B20
 #include <ArduinoOTA.h>
+#include <list>
+#include <iterator>
 
 IPAddress staticIP(192, 168, 2, 200); //ESP static ip
 IPAddress gateway(192, 168, 2, 1);    //IP Address of your WiFi Router (Gateway)
@@ -25,12 +27,19 @@ const int LEDVermelho = 0;      //D3  GPIO0
 const int releResfriamento = 2; //D4  GPIO2
 const int releAquecimento = 14; //D5  GPIO14
 
-float temperaturaEsperada = 18;
+float temperaturaEsperada  = 18;
+std::list<float> registroDeTemperatura;
+
+float lerTemperatura(int time = 5000) {
+  sensors.requestTemperatures();
+  delay(time);
+  float temperaturaAtual = sensors.getTempCByIndex(0);
+  return temperaturaAtual;
+}
 
 void getTemperatura()
 {
-  sensors.requestTemperatures();
-  float temperaturaAtual = sensors.getTempCByIndex(0);
+  float temperaturaAtual = lerTemperatura(0);
   Serial.print("Get: ");
   Serial.print(temperaturaAtual);
   Serial.println(" ºC");
@@ -41,11 +50,11 @@ void getTemperatura()
   JsonObject Atual = doc.createNestedObject("Atual");
   Atual["Temperatura"] = temperaturaAtual;
   Atual["Setup"] = temperaturaEsperada;
-  Atual["ReleResfriamento"] = digitalRead(releResfriamento) == 0 ? true : false;
-  Atual["ReleAquecimento"] = digitalRead(releAquecimento) == 0 ? true : false;
-  Atual["LEDVermelho"] = digitalRead(LEDVermelho) == 0 ? true : false;
-  Atual["LEDVerde"] = digitalRead(LEDVerde) == 0 ? true : false;
-  Atual["LEDAzul"] = digitalRead(LEDAzul) == 0 ? true : false;
+  Atual["ReleResfriamento"] = digitalRead(releResfriamento) == 0;
+  Atual["ReleAquecimento"] = digitalRead(releAquecimento) == 0;
+  Atual["LEDVermelho"] = digitalRead(LEDVermelho) == 1;
+  Atual["LEDVerde"] = digitalRead(LEDVerde) == 1;
+  Atual["LEDAzul"] = digitalRead(LEDAzul) == 1;
 
   JsonArray Rampas = doc.createNestedArray("Rampas");
 
@@ -92,6 +101,24 @@ void setRampa()
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "application/json", "{\"Recebido\":" + retorno + "}");
 }
+
+void getHistorico()
+{
+  const size_t capacity = JSON_ARRAY_SIZE(registroDeTemperatura.size()) + 4 * JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(7);
+  DynamicJsonDocument doc(capacity);
+
+
+  JsonArray Historico = doc.createNestedArray("Historico");
+  int i = 0;
+  float soma = 0;
+  for (i = 0; i < registroDeTemperatura.size(); i++) {
+    auto it = std::next(registroDeTemperatura.begin(), 1);
+    Historico[i] = *it;
+    soma += *it;
+  }
+  doc["Media"] = i / registroDeTemperatura.size();
+}
+
 void handleRoot()
 {
   server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -183,6 +210,8 @@ void setup(void)
   //  Chama a função 'setRampa' quando buscar o endereço 'http://enderecoControlador/rampa' e usar método POST
   server.on("/rampa", HTTP_POST, setRampa);
 
+  server.on("/historico", HTTP_GET, getHistorico);
+
   // Retorna um 404 quando tiver uma url desconhecida
   server.onNotFound(handleNotFound);
 
@@ -190,37 +219,40 @@ void setup(void)
   Serial.println("Servidor HTTP inicializado");
 }
 
+void ligarLed(int LEDAzulState = 0, int LEDVermelhoState = 0, int LEDVerdeState = 0) {
+  digitalWrite(LEDAzul, LEDAzulState);
+  digitalWrite(LEDVerde, LEDVerdeState);
+  digitalWrite(LEDVermelho, LEDVermelhoState);
+}
+
+void ligarRele(int resfriamento = 0, int aquecimento = 0) {
+  digitalWrite(releResfriamento, resfriamento);
+  digitalWrite(releAquecimento, aquecimento);
+}
+
 void loop(void)
 {
   ArduinoOTA.handle();
   server.handleClient();
-  sensors.requestTemperatures();
-  float temperaturaAtual = (int)sensors.getTempCByIndex(0);
-  Serial.println(temperaturaAtual);
+  float temperaturaAtual = lerTemperatura(1000);
+  registroDeTemperatura.push_front(temperaturaAtual);
+  
   if (temperaturaAtual >= temperaturaEsperada + 1)
   {
-    digitalWrite(releResfriamento, LOW);
-    digitalWrite(releAquecimento, HIGH);
-    digitalWrite(LEDAzul, LOW);
-    digitalWrite(LEDVerde, LOW);
-    digitalWrite(LEDVermelho, HIGH);
+    ligarRele(0, 1);
+    ligarLed(0, 1, 0);
     return;
   }
-  // if (temperaturaAtual <= temperaturaEsperada - 1)
-  // {
+  if (temperaturaAtual <= temperaturaEsperada - 1)
+  {
 
-  //   digitalWrite(releResfriamento, HIGH);
-  //   digitalWrite(releAquecimento, LOW);
-  //   digitalWrite(LEDAzul, HIGH);
-  //   digitalWrite(LEDVerde, LOW);
-  //   digitalWrite(LEDVermelho, LOW);
-  //   return;
-  // }
-  // digitalWrite(LEDAzul, LOW);
-  // digitalWrite(LEDVerde, HIGH);
-  // digitalWrite(LEDVermelho, LOW);
+    ligarRele(1, 0);
+    ligarLed(1, 0, 0);
+    return;
+  }
+  ligarLed(0, 0, 1);
   /*
   Lógica para inversão automatrica
   digitalWrite(LEDAzul, !digitalRead(LEDAzul));
-*/
+  */
 }
