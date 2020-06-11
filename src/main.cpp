@@ -112,11 +112,15 @@ void getHistorico()
   int i = 0;
   float soma = 0;
   for (i = 0; i < registroDeTemperatura.size(); i++) {
-    auto it = std::next(registroDeTemperatura.begin(), 1);
+    auto it = std::next(registroDeTemperatura.begin(), i);
     Historico[i] = *it;
     soma += *it;
   }
-  doc["Media"] = i / registroDeTemperatura.size();
+  doc["Media"] = soma / registroDeTemperatura.size();
+  String json;
+  serializeJson(doc, json);
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.send(200, "application/json", json);
 }
 
 void handleRoot()
